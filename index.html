@@ -357,6 +357,47 @@
         vents.forEach(([ventFrom, ventTo]) => opening(ventFrom, ventTo, 'vent', {}, owner));
       });
       edgeQueue.forEach(drawVisibleEdge);
+      if (selectedModel === 'a' && directElevation === null) {
+        const outlineStyle = { stroke: 'var(--line)', 'stroke-width': 1.1, 'stroke-linejoin': 'round' };
+        const roomACorners = [[0, 6], [5, 6], [5, 10], [0, 10]];
+        const shouldShowOutlineCorner = (corner) => {
+          const projectedX = project([...corner, 0])[0];
+          const allProjectedX = roomACorners.map(candidate => project([...candidate, 0])[0]);
+          const isSilhouette = Math.abs(projectedX - Math.min(...allProjectedX)) < .01
+            || Math.abs(projectedX - Math.max(...allProjectedX)) < .01;
+          if (!isSilhouette) return false;
+          const closestAtSameX = roomACorners
+            .filter(candidate => Math.abs(project([...candidate, 0])[0] - projectedX) < .01)
+            .map(viewDepth);
+          return viewDepth(corner) >= Math.max(...closestAtSameX) - .001;
+        };
+        [[0, 6], [5, 10]].forEach((corner) => {
+          if (shouldShowOutlineCorner(corner)) line([...corner, 0], [...corner, 1], outlineStyle);
+        });
+      }
+      if (selectedModel === 'a' && directElevation === 0) {
+        line([5, 10, 0], [5, 10, 1], { stroke: 'var(--line)', 'stroke-width': 1.1, 'stroke-linejoin': 'round' });
+      }
+      if (selectedModel === 'a' && directElevation === -90) {
+        line([0, 6, 0], [0, 6, 1], { stroke: 'var(--line)', 'stroke-width': 1.1, 'stroke-linejoin': 'round' });
+      }
+      if (selectedModel === 'a' && directElevation === 90) {
+        line([5, 10, 0], [5, 10, 1], { stroke: 'var(--line)', 'stroke-width': 1.1, 'stroke-linejoin': 'round' });
+      }
+      if (selectedModel === 'a' && directElevation === 180) {
+        line([0, 6, 0], [0, 6, 1], { stroke: 'var(--line)', 'stroke-width': 1.1, 'stroke-linejoin': 'round' });
+      }
+      // Pri kolmých pohľadoch na B až E vždy uzavri oba konce zobrazenej steny.
+      // Spoje pri vnútorných priečkach by ich inak potlačili.
+      if (['b', 'c', 'd', 'e'].includes(selectedModel) && directElevation !== null) {
+        const facadeEnds = directElevation === 0 ? [[bounds.minX, bounds.maxY], [bounds.maxX, bounds.maxY]]
+          : directElevation === 180 ? [[bounds.minX, bounds.minY], [bounds.maxX, bounds.minY]]
+          : directElevation === -90 ? [[bounds.minX, bounds.minY], [bounds.minX, bounds.maxY]]
+          : [[bounds.maxX, bounds.minY], [bounds.maxX, bounds.maxY]];
+        facadeEnds.forEach(([x, y]) => line([x, y, 0], [x, y, 1], {
+          stroke: 'var(--line)', 'stroke-width': 1.1, 'stroke-linejoin': 'round',
+        }));
+      }
 
     };
     render3d();

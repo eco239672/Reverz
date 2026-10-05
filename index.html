@@ -12,6 +12,20 @@
     .view-switch { position: fixed; top: 30mm; left: 10mm; z-index: 1; display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-start; gap: 8px; margin: 0; }
     .view-button { appearance: none; border: 1px solid #c5cac5; border-radius: 6px; background: #ffffff; color: var(--ink); padding: 8px 14px; font: 500 15px Arial, sans-serif; }
     .view-button[aria-pressed="true"] { background: #4d554e; border-color: #4d554e; color: #ffffff; }
+    .view-switch > .view-button, .room-a-control > .view-button { width: 140px; text-align: center; }
+    .room-a-control, .switch-control { position: relative; }
+    .menu-options { position: absolute; top: 0; left: calc(100% + 8px); z-index: 2; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .menu-options[hidden] { display: none; }
+    .menu-options.is-open { pointer-events: auto; }
+    .menu-options > .menu-item { opacity: 0; transform: translateX(-14px); transition: opacity 420ms ease, transform 420ms ease; }
+    .menu-options > .menu-item:nth-child(n + 2) { transform: translateY(-18px); }
+    .menu-options.is-open > .menu-item { opacity: 1; transform: translate(0, 0); }
+    .menu-options.is-open > .menu-item:nth-child(2) { transition-delay: 440ms; }
+    .menu-options.is-open > .menu-item:nth-child(3) { transition-delay: 660ms; }
+    .room-a-options > .menu-item > .view-button { width: 84px; text-align: center; }
+    .switch-options, .socket-options, .wire-options { display: grid; grid-auto-flow: column; grid-auto-columns: max-content; column-gap: 8px; row-gap: 0; }
+    .switch-options > .menu-item:nth-child(n + 2), .socket-options > .menu-item:nth-child(n + 2), .wire-options > .menu-item:nth-child(n + 2) { transform: translateX(-14px); }
+    .switch-options.is-open > .menu-item:nth-child(n + 2), .socket-options.is-open > .menu-item:nth-child(n + 2), .wire-options.is-open > .menu-item:nth-child(n + 2) { transform: translate(0, 0); }
     .view-panel { flex: 1 1 auto; min-height: 0; }
     .view-panel:not([hidden]) { display: flex; }
     .drawing { display: flex; width: 100%; height: 100%; align-items: stretch; justify-content: center; overflow: hidden; }
@@ -22,8 +36,18 @@
     .orientation-button[aria-pressed="true"] { background: #4d554e; border-color: #4d554e; color: #ffffff; }
     #three-d-view svg { flex: 1 1 auto; min-height: 0; width: auto; height: auto; cursor: grab; touch-action: none; }
     #three-d-view svg:active { cursor: grabbing; }
+    #three-d-view svg.move-mode { cursor: move; }
+    #three-d-view svg.move-mode:active { cursor: grabbing; }
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
-    @media (max-width: 480px) { main { padding: 12px; } }
+    @media (max-width: 480px) {
+      main { padding: 12px; }
+      #three-d-view svg {
+        width: calc(100vw - 170px);
+        max-width: calc(100vw - 170px);
+        margin-left: auto;
+        margin-right: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -32,8 +56,36 @@
     <span id="zoom-status" class="sr-only" aria-live="polite"></span>
     <div class="view-switch" role="group" aria-label="Zobrazenie výkresu">
       <button class="view-button" id="top-button" type="button" aria-pressed="true">Floor plan</button>
-      <button class="view-button" id="three-d-button" type="button" data-model="house" aria-pressed="false">House complete</button>
-      <button class="view-button" type="button" data-model="a" aria-pressed="false">Room A</button>
+      <button class="view-button" id="three-d-button" type="button" data-model="house" aria-pressed="false">House 3d</button>
+      <div class="room-a-control">
+        <button class="view-button" id="room-a-button" type="button" data-model="a" aria-pressed="false" aria-expanded="false" aria-controls="room-a-options">Room A</button>
+        <div class="room-a-options menu-options" id="room-a-options" hidden>
+          <div class="menu-item switch-control">
+            <button class="view-button" id="switch-button" type="button" aria-pressed="false" aria-expanded="false" aria-controls="switch-options">Switch</button>
+            <div class="switch-options menu-options" id="switch-options" hidden>
+              <div class="menu-item"><button class="view-button" type="button" data-switch-variant aria-pressed="false">A</button></div>
+              <div class="menu-item"><button class="view-button" type="button" data-switch-variant aria-pressed="false">B</button></div>
+              <div class="menu-item"><button class="view-button" type="button" data-switch-variant aria-pressed="false">C</button></div>
+            </div>
+          </div>
+          <div class="menu-item socket-control">
+            <button class="view-button" id="socket-button" type="button" aria-pressed="false" aria-expanded="false" aria-controls="socket-options">Socket</button>
+            <div class="socket-options menu-options" id="socket-options" hidden>
+              <div class="menu-item"><button class="view-button" type="button" data-socket-variant aria-pressed="false">A</button></div>
+              <div class="menu-item"><button class="view-button" type="button" data-socket-variant aria-pressed="false">B</button></div>
+              <div class="menu-item"><button class="view-button" type="button" data-socket-variant aria-pressed="false">C</button></div>
+            </div>
+          </div>
+          <div class="menu-item wire-control">
+            <button class="view-button" id="wire-button" type="button" aria-pressed="false" aria-expanded="false" aria-controls="wire-options">Wire</button>
+            <div class="wire-options menu-options" id="wire-options" hidden>
+              <div class="menu-item"><button class="view-button" type="button" data-wire-variant aria-pressed="false">A</button></div>
+              <div class="menu-item"><button class="view-button" type="button" data-wire-variant aria-pressed="false">B</button></div>
+              <div class="menu-item"><button class="view-button" type="button" data-wire-variant aria-pressed="false">C</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <button class="view-button" type="button" data-model="b" aria-pressed="false">Room B</button>
       <button class="view-button" type="button" data-model="c" aria-pressed="false">Room C</button>
       <button class="view-button" type="button" data-model="d" aria-pressed="false">Room D</button>
@@ -96,6 +148,7 @@
         <button class="orientation-button" type="button" data-yaw="-90" data-pitch="0" aria-pressed="false">Left</button>
         <button class="orientation-button" type="button" data-yaw="90" data-pitch="0" aria-pressed="false">Right</button>
         <button class="orientation-button" type="button" data-yaw="180" data-pitch="0" aria-pressed="false">Back</button>
+        <button class="orientation-button move-button" id="move-button" type="button" aria-pressed="false">Move</button>
       </div>
       <svg viewBox="0 0 820 680" role="img" aria-labelledby="three-d-title three-d-desc">
         <title id="three-d-title">Trojrozmerný pohľad na päť prepojených miestností</title>
@@ -107,20 +160,124 @@
   <script>
     const topButton = document.getElementById('top-button');
     const modelButtons = [...document.querySelectorAll('[data-model]')];
+    const roomAButton = document.getElementById('room-a-button');
+    const roomAOptions = document.getElementById('room-a-options');
+    const switchButton = document.getElementById('switch-button');
+    const switchOptions = document.getElementById('switch-options');
+    const switchVariantButtons = [...document.querySelectorAll('[data-switch-variant]')];
+    const socketButton = document.getElementById('socket-button');
+    const socketOptions = document.getElementById('socket-options');
+    const socketVariantButtons = [...document.querySelectorAll('[data-socket-variant]')];
+    const wireButton = document.getElementById('wire-button');
+    const wireOptions = document.getElementById('wire-options');
+    const wireVariantButtons = [...document.querySelectorAll('[data-wire-variant]')];
     const topView = document.getElementById('top-view');
     const threeDView = document.getElementById('three-d-view');
     let selectedModel = 'house';
+    const closeSwitchOptions = () => {
+      switchOptions.classList.remove('is-open');
+      switchOptions.hidden = true;
+      switchButton.setAttribute('aria-pressed', 'false');
+      switchButton.setAttribute('aria-expanded', 'false');
+      switchVariantButtons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+    };
+    const openSwitchOptions = () => {
+      switchOptions.hidden = false;
+      switchOptions.classList.remove('is-open');
+      requestAnimationFrame(() => requestAnimationFrame(() => switchOptions.classList.add('is-open')));
+      switchButton.setAttribute('aria-pressed', 'true');
+      switchButton.setAttribute('aria-expanded', 'true');
+    };
+    const closeSocketOptions = () => {
+      socketOptions.classList.remove('is-open');
+      socketOptions.hidden = true;
+      socketButton.setAttribute('aria-pressed', 'false');
+      socketButton.setAttribute('aria-expanded', 'false');
+      socketVariantButtons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+    };
+    const openSocketOptions = () => {
+      socketOptions.hidden = false;
+      socketOptions.classList.remove('is-open');
+      requestAnimationFrame(() => requestAnimationFrame(() => socketOptions.classList.add('is-open')));
+      socketButton.setAttribute('aria-pressed', 'true');
+      socketButton.setAttribute('aria-expanded', 'true');
+    };
+    const closeWireOptions = () => {
+      wireOptions.classList.remove('is-open');
+      wireOptions.hidden = true;
+      wireButton.setAttribute('aria-pressed', 'false');
+      wireButton.setAttribute('aria-expanded', 'false');
+      wireVariantButtons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+    };
+    const openWireOptions = () => {
+      wireOptions.hidden = false;
+      wireOptions.classList.remove('is-open');
+      requestAnimationFrame(() => requestAnimationFrame(() => wireOptions.classList.add('is-open')));
+      wireButton.setAttribute('aria-pressed', 'true');
+      wireButton.setAttribute('aria-expanded', 'true');
+    };
+    const closeRoomAOptions = () => {
+      closeSwitchOptions();
+      closeSocketOptions();
+      closeWireOptions();
+      roomAOptions.classList.remove('is-open');
+      roomAOptions.hidden = true;
+      roomAButton.setAttribute('aria-expanded', 'false');
+    };
+    const openRoomAOptions = () => {
+      closeSwitchOptions();
+      closeSocketOptions();
+      closeWireOptions();
+      roomAOptions.hidden = false;
+      roomAOptions.classList.remove('is-open');
+      // Restart the sequence whenever Room A is selected.
+      requestAnimationFrame(() => requestAnimationFrame(() => roomAOptions.classList.add('is-open')));
+      roomAButton.setAttribute('aria-expanded', 'true');
+    };
     const showView = (showThreeD) => {
       topView.hidden = showThreeD;
       threeDView.hidden = !showThreeD;
       topButton.setAttribute('aria-pressed', String(!showThreeD));
-      if (!showThreeD) modelButtons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+      if (!showThreeD) {
+        modelButtons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+        closeRoomAOptions();
+      }
     };
     topButton.addEventListener('click', () => showView(false));
+    switchButton.addEventListener('click', () => {
+      closeSocketOptions();
+      closeWireOptions();
+      openSwitchOptions();
+    });
+    switchVariantButtons.forEach(button => button.addEventListener('click', () => {
+      switchVariantButtons.forEach(variant => variant.setAttribute('aria-pressed', String(variant === button)));
+    }));
+    socketButton.addEventListener('click', () => {
+      closeSwitchOptions();
+      closeWireOptions();
+      openSocketOptions();
+    });
+    socketVariantButtons.forEach(button => button.addEventListener('click', () => {
+      socketVariantButtons.forEach(variant => variant.setAttribute('aria-pressed', String(variant === button)));
+    }));
+    wireButton.addEventListener('click', () => {
+      closeSwitchOptions();
+      closeSocketOptions();
+      openWireOptions();
+    });
+    wireVariantButtons.forEach(button => button.addEventListener('click', () => {
+      wireVariantButtons.forEach(variant => variant.setAttribute('aria-pressed', String(variant === button)));
+    }));
+    document.addEventListener('pointerdown', event => {
+      if (!event.target.closest('.view-switch')) closeRoomAOptions();
+    });
     modelButtons.forEach(button => button.addEventListener('click', () => {
       selectedModel = button.dataset.model;
       showView(true);
       modelButtons.forEach(modelButton => modelButton.setAttribute('aria-pressed', String(modelButton === button)));
+      const isRoomA = button === roomAButton;
+      if (isRoomA) openRoomAOptions();
+      else closeRoomAOptions();
       render3d();
     }));
 
@@ -155,6 +312,7 @@
       d: { minX: 5, maxX: 10, minY: 3, maxY: 6 },
       e: { minX: 5, maxX: 10, minY: 6, maxY: 10 },
     };
+    const modelOffsets = Object.fromEntries(Object.keys(modelBounds).map(model => [model, { x: 0, y: 0 }]));
     const project = ([x, y, z = 0]) => {
       const radians = yaw * Math.PI / 180;
       const tilt = pitch * Math.PI / 180;
@@ -167,9 +325,10 @@
       // Výška stien je v obraze konštantná; náklon ovplyvňuje len hĺbku pôdorysu.
       const planeY = depth * 19 * Math.sin(tilt) - z * 120;
       const rollRadians = roll * Math.PI / 180;
+      const offset = modelOffsets[selectedModel];
       return [
-        410 + planeX * Math.cos(rollRadians) - planeY * Math.sin(rollRadians),
-        355 + planeX * Math.sin(rollRadians) + planeY * Math.cos(rollRadians),
+        410 + offset.x + planeX * Math.cos(rollRadians) - planeY * Math.sin(rollRadians),
+        355 + offset.y + planeX * Math.sin(rollRadians) + planeY * Math.cos(rollRadians),
       ];
     };
     const svg = (name, attributes = {}, parent = drawing3d) => {
@@ -403,9 +562,17 @@
     render3d();
 
     const threeDSvg = drawing3d.closest('svg');
-    const orientationButtons = [...document.querySelectorAll('.orientation-button')];
+    const orientationButtons = [...document.querySelectorAll('.orientation-button[data-yaw]')];
+    const moveButton = document.getElementById('move-button');
+    let moveMode = false;
     const clearOrientationSelection = () => orientationButtons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+    const setMoveMode = (isActive) => {
+      moveMode = isActive;
+      moveButton.setAttribute('aria-pressed', String(moveMode));
+      threeDSvg.classList.toggle('move-mode', moveMode);
+    };
     const setOrientation = (nextYaw, nextPitch, selectedButton) => {
+      setMoveMode(false);
       yaw = nextYaw;
       pitch = nextPitch;
       roll = 0;
@@ -423,14 +590,21 @@
       if (!dragStart) return;
       const moveX = event.clientX - dragStart.x;
       const moveY = event.clientY - dragStart.y;
-      clearOrientationSelection();
-      if (event.shiftKey) {
-        roll += moveX * .5;
+      if (moveMode) {
+        const rect = threeDSvg.getBoundingClientRect();
+        const offset = modelOffsets[selectedModel];
+        offset.x += moveX * 820 / rect.width;
+        offset.y += moveY * 680 / rect.height;
       } else {
-        yaw += moveX * .5;
-        pitch = Math.max(-70, Math.min(70, pitch - moveY * .25));
+        clearOrientationSelection();
+        if (event.shiftKey) {
+          roll += moveX * .5;
+        } else {
+          yaw += moveX * .5;
+          pitch = Math.max(-70, Math.min(70, pitch - moveY * .25));
+        }
+        directElevation = null;
       }
-      directElevation = null;
       dragStart = { x: event.clientX, y: event.clientY };
       render3d();
     });
@@ -440,6 +614,10 @@
     };
     threeDSvg.addEventListener('pointerup', stopRotation);
     threeDSvg.addEventListener('pointercancel', stopRotation);
+    moveButton.addEventListener('click', () => {
+      clearOrientationSelection();
+      setMoveMode(!moveMode);
+    });
     // Front je spodná hrana pôdorysu. Smerové pohľady majú pitch 0 (kolmý pohľad),
     // voľba 3D obnoví axonometrický náhľad.
     orientationButtons.forEach(button => button.addEventListener('click', () => setOrientation(Number(button.dataset.yaw), Number(button.dataset.pitch), button)));

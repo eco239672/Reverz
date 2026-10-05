@@ -2,12 +2,12 @@
 
 ## English
 
-A simple web project with a five-room floor plan. It includes a floor-plan view, a complete 3D house model, separate 3D models for rooms A–E, and 3D, Front, Left, Right, and Back views.
+A simple application for electricians, designed to create electrical networks in family homes.
 
 Open `index.html` in a web browser.
 
 ## Slovensky
 
-Jednoduchý webový projekt s pôdorysom piatich miestností. Obsahuje pohľad zhora, kompletný 3D model domu, samostatné 3D modely miestností A–E a pohľady 3D, Front, Left, Right a Back.
+Jednoduchá aplikácia pre elektrikárov určená na tvorbu elektrickej siete v rodinných domoch.
 
 Otvorte `index.html` vo webovom prehliadači.

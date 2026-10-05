@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Neutrálny domček">
+  <rect width="256" height="256" rx="48" fill="#eef0ee"/>
+  <path d="M45 122 128 52l83 70v83H151v-54h-46v54H45z" fill="#7c827d"/>
+  <path d="M35 128 128 48l93 80" fill="none" stroke="#505651" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+  <rect x="151" y="118" width="34" height="32" rx="4" fill="#d9dcda"/>
+</svg>

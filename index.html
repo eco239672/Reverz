@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reverz — pôdorys piatich miestností</title>
+  <style>
+    :root { --page: #ffffff; --ink: #252825; --muted: #f0f2f0; --secondary: #68706a; --line: #4d554e; --zoom: 1; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; height: 100vh; overflow: hidden; background: var(--page); color: var(--ink); font-family: Arial, sans-serif; }
+    main { width: min(100%, 980px); height: 100vh; margin: 0 auto; padding: 16px 24px; display: flex; flex-direction: column; overflow: hidden; }
+    .view-switch { position: fixed; top: 30mm; left: 10mm; z-index: 1; display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-start; gap: 8px; margin: 0; }
+    .view-button { appearance: none; border: 1px solid #c5cac5; border-radius: 6px; background: #ffffff; color: var(--ink); padding: 8px 14px; font: 500 15px Arial, sans-serif; }
+    .view-button[aria-pressed="true"] { background: #4d554e; border-color: #4d554e; color: #ffffff; }
+    .view-panel { flex: 1 1 auto; min-height: 0; }
+    .view-panel:not([hidden]) { display: flex; }
+    .drawing { display: flex; width: 100%; height: 100%; align-items: stretch; justify-content: center; overflow: hidden; }
+    svg { display: block; width: auto; height: 100%; max-width: 100%; margin: auto; transform: scale(var(--zoom)); transform-origin: center; }
+    #three-d-view { flex-direction: column; gap: 8px; overflow: hidden; }
+    .orientation-controls { display: flex; flex: 0 0 auto; justify-content: center; gap: 8px; }
+    .orientation-button { appearance: none; border: 1px solid #c5cac5; border-radius: 6px; background: #ffffff; color: var(--ink); padding: 6px 12px; font: 500 14px Arial, sans-serif; }
+    .orientation-button[aria-pressed="true"] { background: #4d554e; border-color: #4d554e; color: #ffffff; }
+    #three-d-view svg { flex: 1 1 auto; min-height: 0; width: auto; height: auto; cursor: grab; touch-action: none; }
+    #three-d-view svg:active { cursor: grabbing; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+    @media (max-width: 480px) { main { padding: 12px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 class="sr-only">Reverz — pôdorys piatich miestností</h1>
+    <span id="zoom-status" class="sr-only" aria-live="polite"></span>
+    <div class="view-switch" role="group" aria-label="Zobrazenie výkresu">
+      <button class="view-button" id="top-button" type="button" aria-pressed="true">Floor plan</button>
+      <button class="view-button" id="three-d-button" type="button" data-model="house" aria-pressed="false">House complete</button>
+      <button class="view-button" type="button" data-model="a" aria-pressed="false">Room A</button>
+      <button class="view-button" type="button" data-model="b" aria-pressed="false">Room B</button>
+      <button class="view-button" type="button" data-model="c" aria-pressed="false">Room C</button>
+      <button class="view-button" type="button" data-model="d" aria-pressed="false">Room D</button>
+      <button class="view-button" type="button" data-model="e" aria-pressed="false">Room E</button>
+    </div>
+    <section class="view-panel" id="top-view" aria-label="Pohľad zhora">
+    <div class="drawing">
+      <svg viewBox="0 0 720 710" role="img" aria-labelledby="plan-title plan-desc">
+        <title id="plan-title">Pôdorys piatich miestností</title>
+        <desc id="plan-desc">Horná miestnosť má 5 krát 6 metrov, nad pravou izbou je izba 5 krát 2 metre a nad ňou izba 5 krát 4 metre. Dve dolné miestnosti majú každá 5 krát 4 metre.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto-start-reverse"><path d="M0,0 L9,4.5 L0,9z" fill="none" stroke="currentColor" /></marker>
+        </defs>
+        <g id="drawing" transform="translate(0 0)">
+          <rect x="120" y="100" width="250" height="290" fill="none" />
+          <rect x="120" y="400" width="250" height="200" fill="none" />
+          <rect x="380" y="100" width="250" height="190" fill="none" />
+          <rect x="380" y="300" width="250" height="90" fill="none" />
+          <rect x="380" y="400" width="250" height="200" fill="none" />
+
+          <path d="M110,90 H145 M345,90 H467 M543,90 H640 V157 M640,233 V319 M640,371 V462 M640,538 V610 H543 M467,610 H265 M225,610 H110 M110,610 V538 M110,462 V344 M110,268 V222 M110,146 V90" fill="none" stroke="currentColor" stroke-width="1" />
+          <path d="M120,100 H145 M345,100 H370 M380,100 H467 M543,100 H630 V157 M630,233 V290 M630,300 V319 M630,371 V390 M630,400 V462 M630,538 V600 H543 M467,600 H380 M370,600 H265 M225,600 H120 M120,600 V538 M120,462 V400 M120,390 V344 M120,268 V222 M120,146 V100" fill="none" stroke="currentColor" stroke-width="1" />
+          <path d="M120,390 H225 M265,390 H370 M120,400 H225 M265,400 H370 M225,390 V400 M265,390 V400 M225,600 V610 M265,600 V610 M370,100 V200 M370,240 V300 M380,100 V200 M380,240 V290 M370,200 H380 M370,240 H380 M370,300 V330 M370,370 V390 M380,300 V330 M380,370 V390 M370,330 H380 M370,370 H380 M380,290 H480 M520,290 H630 M380,300 H480 M520,300 H630 M480,290 V300 M520,290 V300 M380,390 H480 M520,390 H630 M380,400 H480 M520,400 H630 M480,390 V400 M370,400 V480 M370,520 V600 M380,400 V480 M380,520 V600 M370,480 H380 M370,520 H380 M110,146 H120 M110,184 H120 M110,222 H120 M110,268 H120 M110,306 H120 M110,344 H120 M110,462 H120 M110,538 H120 M630,319 H640 M630,345 H640 M630,371 H640" fill="none" stroke="currentColor" stroke-width="0.75" />
+
+          <path d="M225,400 V440 M225,440 A40,40 0 0 0 265,400 M225,610 V650 M225,650 A40,40 0 0 0 265,610 M380,200 H420 M420,200 A40,40 0 0 1 380,240 M380,330 H420 M420,330 A40,40 0 0 1 380,370 M480,300 V340 M480,340 A40,40 0 0 0 520,300 M480,400 V440 M480,440 A40,40 0 0 0 520,400 M380,480 H420 M420,480 A40,40 0 0 1 380,520" fill="none" stroke="currentColor" stroke-width="0.75" />
+          <path d="M225,395 H265 M225,605 H265 M375,200 V240 M375,330 V370 M480,295 H520 M480,395 H520 M375,480 V520" fill="none" stroke="var(--secondary)" stroke-width="0.75" stroke-dasharray="4 3" />
+          <line x1="145" y1="90" x2="345" y2="90" stroke="currentColor" /><line x1="145" y1="100" x2="345" y2="100" stroke="currentColor" /><path d="M145,100 V120 H245 V100 M245,100 V120 H345 V100" fill="none" stroke="currentColor" stroke-width="0.75" /><line x1="467" y1="90" x2="543" y2="90" stroke="currentColor" /><line x1="467" y1="100" x2="543" y2="100" stroke="currentColor" /><line x1="467" y1="90" x2="467" y2="100" stroke="currentColor" /><line x1="543" y1="90" x2="543" y2="100" stroke="currentColor" /><line x1="505" y1="90" x2="505" y2="100" stroke="currentColor" stroke-width="0.75" /><line x1="110" y1="146" x2="110" y2="222" stroke="currentColor" /><line x1="120" y1="146" x2="120" y2="222" stroke="currentColor" /><line x1="110" y1="268" x2="110" y2="344" stroke="currentColor" /><line x1="120" y1="268" x2="120" y2="344" stroke="currentColor" /><line x1="110" y1="184" x2="120" y2="184" stroke="currentColor" stroke-width="0.75" /><line x1="110" y1="306" x2="120" y2="306" stroke="currentColor" stroke-width="0.75" /><line x1="110" y1="462" x2="110" y2="538" stroke="currentColor" /><line x1="120" y1="462" x2="120" y2="538" stroke="currentColor" /><line x1="110" y1="500" x2="120" y2="500" stroke="currentColor" stroke-width="0.75" /><line x1="630" y1="157" x2="630" y2="233" stroke="currentColor" /><line x1="640" y1="157" x2="640" y2="233" stroke="currentColor" /><line x1="630" y1="157" x2="640" y2="157" stroke="currentColor" /><line x1="630" y1="233" x2="640" y2="233" stroke="currentColor" /><line x1="630" y1="195" x2="640" y2="195" stroke="currentColor" stroke-width="0.75" /><line x1="630" y1="319" x2="630" y2="371" stroke="currentColor" /><line x1="640" y1="319" x2="640" y2="371" stroke="currentColor" /><line x1="630" y1="462" x2="630" y2="538" stroke="currentColor" /><line x1="640" y1="462" x2="640" y2="538" stroke="currentColor" /><line x1="630" y1="462" x2="640" y2="462" stroke="currentColor" /><line x1="630" y1="538" x2="640" y2="538" stroke="currentColor" /><line x1="630" y1="500" x2="640" y2="500" stroke="currentColor" stroke-width="0.75" /><line x1="467" y1="600" x2="543" y2="600" stroke="currentColor" /><line x1="467" y1="610" x2="543" y2="610" stroke="currentColor" /><line x1="467" y1="600" x2="467" y2="610" stroke="currentColor" /><line x1="543" y1="600" x2="543" y2="610" stroke="currentColor" /><line x1="505" y1="600" x2="505" y2="610" stroke="currentColor" stroke-width="0.75" />
+
+          <g fill="currentColor" text-anchor="middle" font-family="Arial, sans-serif">
+            <text x="245" y="242" font-size="22">30 m²</text><text x="245" y="269" fill="var(--secondary)" font-size="15">B · 5 × 6 m</text>
+            <text x="245" y="502" font-size="22">20 m²</text><text x="245" y="529" fill="var(--secondary)" font-size="15">A · 5 × 4 m</text>
+            <text x="505" y="180" font-size="20">20 m²</text><text x="505" y="205" fill="var(--secondary)" font-size="14">C · 5 × 4 m</text>
+            <text x="505" y="337" font-size="20">10 m²</text><text x="505" y="360" fill="var(--secondary)" font-size="13">D · 5 × 2 m</text>
+            <text x="505" y="502" font-size="22">20 m²</text><text x="505" y="529" fill="var(--secondary)" font-size="15">E · 5 × 4 m</text>
+            <text x="245" y="425" fill="var(--secondary)" font-size="12">D1</text><text x="245" y="577" fill="var(--secondary)" font-size="12">D1</text><text x="350" y="505" fill="var(--secondary)" font-size="12">D1</text>
+            <text x="94" y="184" transform="rotate(-90 94 184)" fill="var(--secondary)" font-size="12">O1</text><text x="94" y="306" transform="rotate(-90 94 306)" fill="var(--secondary)" font-size="12">O1</text><text x="94" y="500" transform="rotate(-90 94 500)" fill="var(--secondary)" font-size="12">O1</text>
+          </g>
+
+          <g stroke="currentColor" stroke-width="0.75" marker-start="url(#arrow)" marker-end="url(#arrow)">
+            <line x1="120" y1="64" x2="370" y2="64" /><line x1="380" y1="64" x2="630" y2="64" /><line x1="70" y1="100" x2="70" y2="390" /><line x1="70" y1="400" x2="70" y2="600" /><line x1="120" y1="649" x2="370" y2="649" /><line x1="380" y1="649" x2="630" y2="649" />
+          </g>
+          <g stroke="currentColor" stroke-width="0.75">
+            <line x1="120" y1="72" x2="120" y2="93" /><line x1="370" y1="72" x2="370" y2="93" /><line x1="380" y1="72" x2="380" y2="93" /><line x1="630" y1="72" x2="630" y2="93" /><line x1="77" y1="100" x2="113" y2="100" /><line x1="77" y1="390" x2="113" y2="390" /><line x1="77" y1="400" x2="113" y2="400" /><line x1="77" y1="600" x2="113" y2="600" /><line x1="120" y1="617" x2="120" y2="642" /><line x1="370" y1="617" x2="370" y2="642" /><line x1="380" y1="617" x2="380" y2="642" /><line x1="630" y1="617" x2="630" y2="642" />
+          </g>
+          <g fill="currentColor" text-anchor="middle" font-family="Arial, sans-serif" font-size="16"><text x="245" y="57">5 m</text><text x="505" y="57">5 m</text><text x="45" y="250">6 m</text><text x="45" y="503">4 m</text><text x="245" y="641">5 m</text><text x="505" y="641">5 m</text></g>
+          <g fill="var(--ink)" font-family="Arial, sans-serif" font-size="15">
+            <text x="375" y="30" text-anchor="middle">Back</text>
+            <text x="375" y="682" text-anchor="middle">Front</text>
+            <text x="22" y="350" text-anchor="middle">Left</text>
+            <text x="690" y="350" text-anchor="middle">Right</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+    </section>
+    <section class="view-panel" id="three-d-view" aria-label="Trojrozmerný pohľad" hidden>
+      <div class="orientation-controls" role="group" aria-label="Pohľad na model">
+        <button class="orientation-button" type="button" data-yaw="-45" data-pitch="30" aria-pressed="true">3D</button>
+        <button class="orientation-button" type="button" data-yaw="0" data-pitch="0" aria-pressed="false">Front</button>
+        <button class="orientation-button" type="button" data-yaw="-90" data-pitch="0" aria-pressed="false">Left</button>
+        <button class="orientation-button" type="button" data-yaw="90" data-pitch="0" aria-pressed="false">Right</button>
+        <button class="orientation-button" type="button" data-yaw="180" data-pitch="0" aria-pressed="false">Back</button>
+      </div>
+      <svg viewBox="0 0 820 680" role="img" aria-labelledby="three-d-title three-d-desc">
+        <title id="three-d-title">Trojrozmerný pohľad na päť prepojených miestností</title>
+        <desc id="three-d-desc">Axonometrický model so zhodnými súradnicami ako pôdorys; tlačidlá Front, Left, Right a Back zobrazia kolmý pohľad na príslušnú obvodovú stenu.</desc>
+        <g id="three-d-drawing"></g>
+      </svg>
+    </section>
+  </main>
+  <script>
+    const topButton = document.getElementById('top-button');
+    const modelButtons = [...document.querySelectorAll('[data-model]')];
+    const topView = document.getElementById('top-view');
+    const threeDView = document.getElementById('three-d-view');
+    let selectedModel = 'house';
+    const showView = (showThreeD) => {
+      topView.hidden = showThreeD;
+      threeDView.hidden = !showThreeD;
+      topButton.setAttribute('aria-pressed', String(!showThreeD));
+      if (!showThreeD) modelButtons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+    };
+    topButton.addEventListener('click', () => showView(false));
+    modelButtons.forEach(button => button.addEventListener('click', () => {
+      selectedModel = button.dataset.model;
+      showView(true);
+      modelButtons.forEach(modelButton => modelButton.setAttribute('aria-pressed', String(modelButton === button)));
+      render3d();
+    }));
+
+    let zoom = 1;
+    const zoomStatus = document.getElementById('zoom-status');
+    const setZoom = (nextZoom) => {
+      zoom = Math.max(.5, Math.min(2.5, nextZoom));
+      document.documentElement.style.setProperty('--zoom', zoom);
+      zoomStatus.textContent = `Mierka pohľadu: ${Math.round(zoom * 100)} %`;
+    };
+    window.addEventListener('keydown', (event) => {
+      if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+      const zoomIn = event.key === '+' || event.key === '=' || event.code === 'NumpadAdd';
+      const zoomOut = event.key === '-' || event.key === '_' || event.code === 'NumpadSubtract';
+      if (!zoomIn && !zoomOut) return;
+      event.preventDefault();
+      setZoom(zoom + (zoomIn ? .1 : -.1));
+    });
+
+    // Všetky body sú v metroch a zdieľajú súradnicový systém s 2D pôdorysom.
+    const drawing3d = document.getElementById('three-d-drawing');
+    const svgNs = 'http://www.w3.org/2000/svg';
+    let yaw = -45;
+    let pitch = 30;
+    let roll = 0;
+    let directElevation = null;
+    const modelBounds = {
+      house: { minX: 0, maxX: 10, minY: 0, maxY: 10 },
+      a: { minX: 0, maxX: 5, minY: 6, maxY: 10 },
+      b: { minX: 0, maxX: 5, minY: 0, maxY: 6 },
+      c: { minX: 5, maxX: 10, minY: 0, maxY: 3 },
+      d: { minX: 5, maxX: 10, minY: 3, maxY: 6 },
+      e: { minX: 5, maxX: 10, minY: 6, maxY: 10 },
+    };
+    const project = ([x, y, z = 0]) => {
+      const radians = yaw * Math.PI / 180;
+      const tilt = pitch * Math.PI / 180;
+      const bounds = modelBounds[selectedModel];
+      const centerX = x - (bounds.minX + bounds.maxX) / 2;
+      const centerY = y - (bounds.minY + bounds.maxY) / 2;
+      const rotatedX = centerX * Math.cos(radians) - centerY * Math.sin(radians);
+      const depth = centerX * Math.sin(radians) + centerY * Math.cos(radians);
+      const planeX = rotatedX * 38;
+      // Výška stien je v obraze konštantná; náklon ovplyvňuje len hĺbku pôdorysu.
+      const planeY = depth * 19 * Math.sin(tilt) - z * 120;
+      const rollRadians = roll * Math.PI / 180;
+      return [
+        410 + planeX * Math.cos(rollRadians) - planeY * Math.sin(rollRadians),
+        355 + planeX * Math.sin(rollRadians) + planeY * Math.cos(rollRadians),
+      ];
+    };
+    const svg = (name, attributes = {}, parent = drawing3d) => {
+      const element = document.createElementNS(svgNs, name);
+      Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+      parent.append(element);
+      return element;
+    };
+    const polygon = (points, attributes = {}, parent) => svg('polygon', {
+      points: points.map(project).map(([x, y]) => `${x},${y}`).join(' '),
+      ...attributes,
+    }, parent);
+    const line = (from, to, attributes = {}, parent) => {
+      const [x1, y1] = project(from); const [x2, y2] = project(to);
+      return svg('line', { x1, y1, x2, y2, ...attributes }, parent);
+    };
+    let edgeQueue = [];
+    let wallFaces = [];
+    const viewDepth = ([x, y]) => {
+      const radians = yaw * Math.PI / 180;
+      const bounds = modelBounds[selectedModel];
+      return (x - (bounds.minX + bounds.maxX) / 2) * Math.sin(radians) + (y - (bounds.minY + bounds.maxY) / 2) * Math.cos(radians);
+    };
+    const pointInside = (point, polygonPoints) => {
+      let direction = 0;
+      for (let index = 0; index < polygonPoints.length; index += 1) {
+        const start = polygonPoints[index];
+        const end = polygonPoints[(index + 1) % polygonPoints.length];
+        const cross = (end[0] - start[0]) * (point[1] - start[1]) - (end[1] - start[1]) * (point[0] - start[0]);
+        if (Math.abs(cross) < .2) return false;
+        const nextDirection = Math.sign(cross);
+        if (direction && direction !== nextDirection) return false;
+        direction = nextDirection;
+      }
+      return true;
+    };
+    const isInteriorSide = ([x, y]) => {
+      if (directElevation !== null) return false;
+      const radians = yaw * Math.PI / 180;
+      if (x === 0) return Math.sin(radians) > 0;
+      if (x === 10) return Math.sin(radians) < 0;
+      if (y === 0) return Math.cos(radians) > 0;
+      if (y === 10) return Math.cos(radians) < 0;
+      return true;
+    };
+    const queueEdge = (from, to, attributes, owner) => edgeQueue.push({ from, to, attributes, owner });
+    const drawVisibleEdge = ({ from, to, attributes, owner }) => {
+      const steps = 72;
+      const pointAt = (fraction) => from.map((value, index) => value + (to[index] - value) * fraction);
+      const visibleAt = (fraction) => {
+        const point = pointAt(fraction);
+        const projected = project(point);
+        const pointDepth = viewDepth(point);
+        return !wallFaces.some((face) => face.owner !== owner
+          && pointInside(projected, face.projected)
+          && face.depth > pointDepth + .001);
+      };
+      let start = null;
+      for (let index = 0; index <= steps; index += 1) {
+        const fraction = index / steps;
+        if (visibleAt(fraction)) {
+          if (start === null) start = fraction;
+        } else if (start !== null) {
+          line(pointAt(start), pointAt((index - 1) / steps), attributes);
+          start = null;
+        }
+      }
+      if (start !== null) line(pointAt(start), pointAt(1), attributes);
+    };
+    const wall = (from, to, bottom = 0, top = 1, { startEdge = true, endEdge = true, owner } = {}) => {
+      const points = [[...from, bottom], [...to, bottom], [...to, top], [...from, top]];
+      polygon(points, { fill: 'var(--page)', stroke: 'none' });
+      wallFaces.push({
+        owner,
+        projected: points.map(project),
+        depth: viewDepth([(from[0] + to[0]) / 2, (from[1] + to[1]) / 2]),
+      });
+      const edgeStyle = { stroke: 'var(--line)', 'stroke-width': 1.1, 'stroke-linejoin': 'round' };
+      queueEdge([...from, bottom], [...to, bottom], edgeStyle, owner);
+      queueEdge([...from, top], [...to, top], edgeStyle, owner);
+      if (startEdge === true || (startEdge === 'inside' && isInteriorSide(from))) queueEdge([...from, bottom], [...from, top], edgeStyle, owner);
+      if (endEdge === true || (endEdge === 'inside' && isInteriorSide(to))) queueEdge([...to, bottom], [...to, top], edgeStyle, owner);
+    };
+    const room = (name, dimensions, points) => {
+      polygon(points, { fill: 'none', stroke: 'var(--line)', 'stroke-width': 1 });
+    };
+    const labelRoom = (name, dimensions, points) => {
+      const center = points.reduce((sum, [x, y]) => [sum[0] + x, sum[1] + y], [0, 0]).map(value => value / points.length);
+      const [x, y] = project(center);
+      const label = svg('text', { x, y: y + 1, fill: 'var(--ink)', 'font-family': 'Arial, sans-serif', 'font-size': 19, 'text-anchor': 'middle' });
+      label.textContent = name;
+      const size = svg('text', { x, y: y + 22, fill: 'var(--secondary)', 'font-family': 'Arial, sans-serif', 'font-size': 14, 'text-anchor': 'middle' });
+      size.textContent = dimensions;
+    };
+    const opening = (from, to, kind, options = {}, owner) => {
+      const edgeStyle = { stroke: 'var(--line)', 'stroke-width': 1, 'stroke-linejoin': 'round' };
+      const bottom = kind === 'window' ? .28 : kind === 'vent' ? .6 : 0;
+      const top = kind === 'window' ? .76 : kind === 'vent' ? .8 : kind === 'sliding' ? .8 : .88;
+      const addSegment = (segmentFrom, segmentTo) => queueEdge(segmentFrom, segmentTo, edgeStyle, owner);
+      if (kind === 'window' || kind === 'vent') {
+        addSegment([...from, bottom], [...to, bottom]);
+        addSegment([...to, bottom], [...to, top]);
+        addSegment([...to, top], [...from, top]);
+        addSegment([...from, top], [...from, bottom]);
+        const midpoint = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
+        addSegment([...midpoint, bottom], [...midpoint, top]);
+      } else {
+        addSegment([...from, bottom], [...to, bottom]);
+        addSegment([...from, top], [...to, top]);
+        addSegment([...from, bottom], [...from, top]);
+        addSegment([...to, bottom], [...to, top]);
+        if (kind === 'sliding') {
+          const midpoint = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
+          addSegment([...midpoint, bottom], [...midpoint, top]);
+        }
+      }
+    };
+    const render3d = () => {
+      drawing3d.replaceChildren();
+      edgeQueue = [];
+      wallFaces = [];
+      const bounds = modelBounds[selectedModel];
+      // Súradnice sú zhodné s pôdorysom: y = 10 je Front (spodná hrana),
+      // y = 0 je Back, x = 0 je Left a x = 10 je Right.
+      if (directElevation === null) {
+        polygon([[bounds.minX, bounds.minY], [bounds.maxX, bounds.minY], [bounds.maxX, bounds.maxY], [bounds.minX, bounds.maxY]], { fill: 'var(--page)', stroke: 'var(--line)', 'stroke-width': 1 });
+      }
+      const walls = [
+        { from: [0, 0], to: [.5, 0], endEdge: false }, { from: [.5, 0], to: [4.5, 0], startEdge: false, endEdge: false, slidingDoors: [[[.5, 0], [4.5, 0]]] }, { from: [4.5, 0], to: [5, 0], startEdge: false, endEdge: false },
+        { from: [5, 0], to: [6.7, 0], startEdge: false, endEdge: false }, { from: [6.7, 0], to: [8.3, 0], startEdge: false, endEdge: false, windows: [[[6.7, 0], [8.3, 0]]] }, { from: [8.3, 0], to: [10, 0], startEdge: false },
+        { from: [10, 0], to: [10, .7], endEdge: false }, { from: [10, .7], to: [10, 2.3], startEdge: false, endEdge: false, windows: [[[10, .7], [10, 2.3]]] }, { from: [10, 2.3], to: [10, 3], startEdge: false, endEdge: false }, { from: [10, 3], to: [10, 4], startEdge: false, endEdge: false }, { from: [10, 4], to: [10, 5], startEdge: false, endEdge: false, vents: [[[10, 4], [10, 5]]] }, { from: [10, 5], to: [10, 6], startEdge: false, endEdge: false },
+        { from: [10, 6], to: [10, 7.2], startEdge: false, endEdge: false }, { from: [10, 7.2], to: [10, 8.8], startEdge: false, endEdge: false, windows: [[[10, 7.2], [10, 8.8]]] }, { from: [10, 8.8], to: [10, 10], startEdge: false },
+        { from: [0, 10], to: [5, 10], endEdge: false, doors: [[[2, 10], [3, 10]]] },
+        { from: [5, 10], to: [6.7, 10], startEdge: false, endEdge: false }, { from: [6.7, 10], to: [8.3, 10], startEdge: false, endEdge: false, windows: [[[6.7, 10], [8.3, 10]]] }, { from: [8.3, 10], to: [10, 10], startEdge: false },
+        { from: [0, 0], to: [0, .9333], endEdge: false },
+        { from: [0, .9333], to: [0, 2.5333], startEdge: false, endEdge: false, windows: [[[0, .9333], [0, 2.5333]]] },
+        { from: [0, 2.5333], to: [0, 3], startEdge: false, endEdge: false },
+        { from: [0, 3], to: [0, 3.4667], startEdge: false, endEdge: false },
+        { from: [0, 3.4667], to: [0, 5.0667], startEdge: false, endEdge: false, windows: [[[0, 3.4667], [0, 5.0667]]] },
+        { from: [0, 5.0667], to: [0, 6], startEdge: false, endEdge: false },
+        { from: [0, 6], to: [0, 7.2], startEdge: false, endEdge: false }, { from: [0, 7.2], to: [0, 8.8], startEdge: false, endEdge: false, windows: [[[0, 7.2], [0, 8.8]]] },
+        { from: [0, 8.8], to: [0, 10], startEdge: false },
+        // Hlavná stena v osi 5 m je rozdelená priečkami na tri samostatné úseky.
+        // Vďaka tomu sa každý úsek pri otáčaní zoradí podľa vlastnej hĺbky.
+        { from: [5, 0], to: [5, 3], startEdge: 'inside', endEdge: true, doors: [[[5, 2], [5, 2.8]]] },
+        { from: [5, 3], to: [5, 6], startEdge: true, endEdge: true, doors: [[[5, 4.6], [5, 5.4]]] },
+        { from: [5, 6], to: [5, 10], startEdge: true, endEdge: 'inside', doors: [[[5, 7.6], [5, 8.4], { showToEdge: () => Math.sin(yaw * Math.PI / 180) > 0 }]] },
+        { from: [5, 3], to: [10, 3], startEdge: true, endEdge: 'inside', doors: [[[7, 3], [8, 3]]] },
+        { from: [0, 6], to: [5, 6], startEdge: 'inside', endEdge: true, doors: [[[2, 6], [3, 6], { showToEdge: () => Math.cos(yaw * Math.PI / 180) < 0 }]] },
+        { from: [5, 6], to: [10, 6], startEdge: true, endEdge: 'inside', doors: [[[7, 6], [8, 6]]] },
+      ].map((wallDefinition, index) => ({ ...wallDefinition, owner: index }));
+      const belongsToSelectedModel = ({ from, to }) => {
+        if (selectedModel === 'house') return true;
+        const between = (value, minimum, maximum) => value >= minimum && value <= maximum;
+        const horizontalFacade = from[1] === to[1]
+          && (from[1] === bounds.minY || from[1] === bounds.maxY)
+          && between(from[0], bounds.minX, bounds.maxX)
+          && between(to[0], bounds.minX, bounds.maxX);
+        const verticalFacade = from[0] === to[0]
+          && (from[0] === bounds.minX || from[0] === bounds.maxX)
+          && between(from[1], bounds.minY, bounds.maxY)
+          && between(to[1], bounds.minY, bounds.maxY);
+        return horizontalFacade || verticalFacade;
+      };
+      const depth = ({ from, to }) => {
+        const radians = yaw * Math.PI / 180;
+        return ((from[0] + to[0]) / 2 - (bounds.minX + bounds.maxX) / 2) * Math.sin(radians) + ((from[1] + to[1]) / 2 - (bounds.minY + bounds.maxY) / 2) * Math.cos(radians);
+      };
+      // Najvzdialenejšie steny sa kreslia najprv. Neviditeľná biela plocha ich
+      // prekryje, takže po otočení zostanú len línie, ktoré nie sú za stenou.
+      const modelWalls = walls.filter(belongsToSelectedModel).sort((a, b) => depth(a) - depth(b));
+      const isOnSelectedFacade = ({ from, to }) => {
+        if (directElevation === 0) return from[1] === bounds.maxY && to[1] === bounds.maxY; // Front
+        if (directElevation === 180) return from[1] === bounds.minY && to[1] === bounds.minY; // Back
+        if (directElevation === -90) return from[0] === bounds.minX && to[0] === bounds.minX; // Left
+        if (directElevation === 90) return from[0] === bounds.maxX && to[0] === bounds.maxX; // Right
+        return true;
+      };
+      const visibleWalls = directElevation === null ? modelWalls : modelWalls.filter(isOnSelectedFacade);
+      visibleWalls.forEach(({ from, to, doors = [], slidingDoors = [], windows = [], vents = [], startEdge, endEdge, owner }) => {
+        wall(from, to, 0, 1, { startEdge, endEdge, owner });
+        doors.forEach(([doorFrom, doorTo, options]) => opening(doorFrom, doorTo, 'door', options, owner));
+        slidingDoors.forEach(([doorFrom, doorTo]) => opening(doorFrom, doorTo, 'sliding', {}, owner));
+        windows.forEach(([windowFrom, windowTo]) => opening(windowFrom, windowTo, 'window', {}, owner));
+        vents.forEach(([ventFrom, ventTo]) => opening(ventFrom, ventTo, 'vent', {}, owner));
+      });
+      edgeQueue.forEach(drawVisibleEdge);
+
+    };
+    render3d();
+
+    const threeDSvg = drawing3d.closest('svg');
+    const orientationButtons = [...document.querySelectorAll('.orientation-button')];
+    const clearOrientationSelection = () => orientationButtons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+    const setOrientation = (nextYaw, nextPitch, selectedButton) => {
+      yaw = nextYaw;
+      pitch = nextPitch;
+      roll = 0;
+      directElevation = nextPitch === 0 ? nextYaw : null;
+      clearOrientationSelection();
+      selectedButton.setAttribute('aria-pressed', 'true');
+      render3d();
+    };
+    let dragStart = null;
+    threeDSvg.addEventListener('pointerdown', (event) => {
+      dragStart = { x: event.clientX, y: event.clientY };
+      threeDSvg.setPointerCapture(event.pointerId);
+    });
+    threeDSvg.addEventListener('pointermove', (event) => {
+      if (!dragStart) return;
+      const moveX = event.clientX - dragStart.x;
+      const moveY = event.clientY - dragStart.y;
+      clearOrientationSelection();
+      if (event.shiftKey) {
+        roll += moveX * .5;
+      } else {
+        yaw += moveX * .5;
+        pitch = Math.max(-70, Math.min(70, pitch - moveY * .25));
+      }
+      directElevation = null;
+      dragStart = { x: event.clientX, y: event.clientY };
+      render3d();
+    });
+    const stopRotation = (event) => {
+      dragStart = null;
+      if (threeDSvg.hasPointerCapture(event.pointerId)) threeDSvg.releasePointerCapture(event.pointerId);
+    };
+    threeDSvg.addEventListener('pointerup', stopRotation);
+    threeDSvg.addEventListener('pointercancel', stopRotation);
+    // Front je spodná hrana pôdorysu. Smerové pohľady majú pitch 0 (kolmý pohľad),
+    // voľba 3D obnoví axonometrický náhľad.
+    orientationButtons.forEach(button => button.addEventListener('click', () => setOrientation(Number(button.dataset.yaw), Number(button.dataset.pitch), button)));
+  </script>
+</body>
+</html>

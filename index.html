@@ -34,20 +34,12 @@
     .orientation-controls { display: flex; flex: 0 0 auto; justify-content: center; gap: 8px; }
     .orientation-button { appearance: none; border: 1px solid #c5cac5; border-radius: 6px; background: #ffffff; color: var(--ink); padding: 6px 12px; font: 500 14px Arial, sans-serif; }
     .orientation-button[aria-pressed="true"] { background: #4d554e; border-color: #4d554e; color: #ffffff; }
-    #three-d-view svg { flex: 1 1 auto; min-height: 0; width: auto; height: auto; cursor: grab; touch-action: none; }
+    #three-d-view svg { flex: 1 1 auto; min-height: 0; width: min(100%, calc(100vw - 170px)); max-width: min(100%, calc(100vw - 170px)); height: auto; margin-left: auto; margin-right: 0; cursor: grab; touch-action: none; }
     #three-d-view svg:active { cursor: grabbing; }
     #three-d-view svg.move-mode { cursor: move; }
     #three-d-view svg.move-mode:active { cursor: grabbing; }
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
-    @media (max-width: 480px) {
-      main { padding: 12px; }
-      #three-d-view svg {
-        width: calc(100vw - 170px);
-        max-width: calc(100vw - 170px);
-        margin-left: auto;
-        margin-right: 0;
-      }
-    }
+    @media (max-width: 480px) { main { padding: 12px; } }
   </style>
 </head>
 <body>
@@ -600,8 +592,8 @@
         if (event.shiftKey) {
           roll += moveX * .5;
         } else {
-          yaw += moveX * .5;
-          pitch = Math.max(-70, Math.min(70, pitch - moveY * .25));
+          yaw -= moveX * .5;
+          pitch = Math.max(-70, Math.min(70, pitch + moveY * .25));
         }
         directElevation = null;
       }
